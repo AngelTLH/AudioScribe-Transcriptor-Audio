@@ -200,14 +200,13 @@ Transcriptor_Audio_Mejora_GitHub/
 
 ---
 
-## 👨‍💻 Autor y Reconocimientos
+## 👨‍💻 Autor
 
 Proyecto desarrollado y mantenido por **Angel Llanos Herrera**.
 
 * 🐙 **GitHub**: [@AngelTLH](https://github.com/AngelTLH)
 * 📧 **Correo de Contacto**: [angel.llanos@alumnos.ucm.cl](mailto:angel.llanos@alumnos.ucm.cl)
 
-### 💖 Apoya el Desarrollo Continuo
 Si este proyecto te ha sido de utilidad para tus estudios, investigaciones o trabajo profesional, considera apoyarlo:
 
 <div align="center">
