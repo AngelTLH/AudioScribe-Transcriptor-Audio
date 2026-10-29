@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest_tmp/
+.ruff_cache/
+.env
+temp_uploads/*
+Transcripciones/*
+Convertidos_MP3/*
+Descarga_audio_YT/*
+Descarga_Videos_YT/*
+Fusionados_Archivos/*
+Recortes_Archivos/*
+!.gitkeep
+*.log
+.env.*

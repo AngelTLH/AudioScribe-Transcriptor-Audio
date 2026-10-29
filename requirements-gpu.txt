@@ -1,0 +1,4 @@
+-r requirements.txt
+# NVIDIA CUDA 12 / cuDNN 9, registrados automáticamente en Windows.
+nvidia-cublas-cu12>=12.9,<13
+nvidia-cudnn-cu12>=9,<10

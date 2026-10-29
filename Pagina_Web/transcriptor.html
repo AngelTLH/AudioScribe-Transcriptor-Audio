@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AudioScribe - Transcriptor de Audio & Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/transcriptor.css" />
+  </head>
+  <body>
+    <!-- Fondo malla abstracta AudioScribe -->
+    <div class="mesh-bg"></div>
+
+    <header class="topbar" style="margin: 1rem auto 0; max-width: 1200px; border-radius: 99px; background: var(--panel); border: 1px solid var(--border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow); padding: 0.75rem 1.5rem;">
+      <div class="container topbar__content" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="brand">
+          <a href="#" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <img src="logo.png" alt="AudioScribe Logo" style="height: 38px; width: auto; object-fit: contain;" />
+            <span class="brand-title">AudioScribe</span>
+          </a>
+        </div>
+        <nav class="nav" aria-label="Navegación principal" style="display: flex; align-items: center; gap: 1rem;">
+          <ul id="menu" class="nav__list" style="display: flex; gap: 0.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a id="nav-btn-transcriptor" class="nav__link is-active" href="#" onclick="showView('transcriptor')">Transcriptor</a></li>
+            <li><a id="nav-btn-converter" class="nav__link" href="#" onclick="showView('converter')">Convertidor MP3</a></li>
+            <li><a id="nav-btn-video-downloader" class="nav__link" href="#" onclick="showView('video-downloader')">Descargar videos</a></li>
+            <li><a id="nav-btn-trimmer" class="nav__link" href="#" onclick="showView('trimmer')">Recortador</a></li>
+            <li><a id="nav-btn-merger" class="nav__link" href="#" onclick="showView('merger')">Fusionador</a></li>
+          </ul>
+          <button id="sound-toggle-btn" class="btn btn--ghost" style="padding: 0.5rem; border-radius: 999px; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; cursor: pointer; border: 1px solid var(--border);" onclick="toggleSoundNotification()" title="Activar/Desactivar sonido de notificación">
+            🔔
+          </button>
+          <button id="theme-toggle" class="btn btn--ghost" style="padding: 0.5rem; border-radius: 999px; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; cursor: pointer; border: 1px solid var(--border);" onclick="toggleTheme()" aria-label="Cambiar tema">
+            <span id="theme-icon">🌙</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+      
+      <!-- VISTA TRANSCRIPTOR -->
+      <div id="view-transcriptor" class="view-section">
+        <section class="section__header" style="margin-bottom: 2rem;">
+          <div>
+            <p class="badge">Automatización IA</p>
+            <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem);">Transcriptor de Audio</h1>
+          </div>
+          <p class="lead">
+            Plataforma avanzada de procesamiento de sonido y transcripción automatizada con generación directa de reportes LaTeX.
+          </p>
+        </section>
+
+        <div class="ks-bento">
+          <!-- Panel de Configuración -->
+          <section class="card card--accent ks-bento-tile ks-bento-tile--span-6">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Parámetros del Sistema</h2>
+            
+            <div class="form">
+              <!-- Modelo Whisper -->
+              <div class="form__field">
+                <label for="whisper-model"><strong>Modelo de Transcripción (Whisper)</strong></label>
+                <select id="whisper-model">
+                  <option value="tiny">Tiny (Velocidad extrema / Precisión básica)</option>
+                  <option value="base">Base (Rápido / Precisión estándar)</option>
+                  <option value="small">Small (Rápido en CPU / precisión equilibrada)</option>
+                  <option value="medium">Medium (Más detalle / mayor tiempo de procesamiento)</option>
+                  <option value="turbo" selected>Large v3 Turbo (Recomendado con GPU)</option>
+                  <option value="large-v3">Large v3 (Prioriza precisión / mayor uso de memoria)</option>
+                </select>
+              </div>
+
+              <!-- Idioma -->
+              <div class="form__field">
+                <label for="audio-language"><strong>Idioma del Audio</strong></label>
+                <select id="audio-language">
+                  <option value="es" selected>Español (es)</option>
+                  <option value="en">Inglés (en)</option>
+                  <option value="auto">Detectar Automáticamente</option>
+                </select>
+              </div>
+
+              <div class="form__field">
+                <label for="transcription-device"><strong>Procesamiento</strong></label>
+                <select id="transcription-device">
+                  <option value="auto" selected>Automático (GPU disponible o CPU)</option>
+                  <option value="cpu">CPU (recomendado con el modelo Small)</option>
+                  <option value="cuda">GPU NVIDIA</option>
+                </select>
+              </div>
+              <div class="form__field">
+                <label for="transcription-quality"><strong>Perfil de transcripción</strong></label>
+                <select id="transcription-quality">
+                  <option value="balanced" selected>Equilibrado (recomendado)</option>
+                  <option value="fast">Rápido (borradores)</option>
+                  <option value="accurate">Cuidadoso (más tiempo de procesamiento)</option>
+                </select>
+              </div>
+              <div class="form__field">
+                <label for="transcription-glossary"><strong>Nombres y términos especializados (opcional)</strong></label>
+                <textarea id="transcription-glossary" rows="2" maxlength="1000" placeholder="Ej.: apellidos, siglas y términos que aparecen en el audio" style="width:100%;font:inherit;"></textarea>
+                <p class="muted">Ayuda a reconocer vocabulario. Los silencios se omiten automáticamente. La primera transcripción de cada modelo descarga sus archivos.</p>
+              </div>
+
+              <!-- Dirección del Servidor API (Opcional) -->
+              <div class="form__field">
+                <label for="api-server-url"><strong>Dirección del Servidor API (Opcional)</strong></label>
+                <input type="text" id="api-server-url" placeholder="Ej. http://192.168.1.15:5000" onchange="saveApiUrl(this.value)" />
+                <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                  Modifica solo si accedes desde otra PC de tu red local. Dejar vacío para usar el servidor local por defecto.
+                </p>
+              </div>
+
+              <!-- Tabs de Selección de Origen -->
+              <div style="margin-top: 1rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">Origen del Audio</strong>
+                <div class="tab-container">
+                  <button class="tab-button is-active" onclick="switchTab('tab-link')">Enlace Web (YouTube / TED)</button>
+                  <button class="tab-button" onclick="switchTab('tab-local')">Archivo Local / Subida</button>
+                </div>
+
+                <!-- Tab Link -->
+                <div id="tab-link" class="tab-content is-active">
+                  <div class="form__field">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                      <label for="audio-url" style="margin-bottom: 0;"><strong>URL del Video o Audio</strong></label>
+                      <button type="button" class="btn btn--ghost" style="font-size: 0.78rem; padding: 0.2rem 0.5rem; color: var(--accent);" onclick="toggleAudioBatchMode()">
+                        <span id="btn-audio-batch-label">📋 Múltiples Enlaces (Por Lotes)</span>
+                      </button>
+                    </div>
+                    <div id="single-audio-url-wrapper">
+                      <input type="url" id="audio-url" placeholder="https://www.youtube.com/watch?v=..." />
+                    </div>
+                    <div id="batch-audio-url-wrapper" style="display: none;">
+                      <textarea id="audio-url-batch" rows="4" placeholder="Pega aquí múltiples enlaces de YouTube (uno por línea)...&#10;https://www.youtube.com/watch?v=1&#10;https://www.youtube.com/watch?v=2" style="width: 100%; border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+                    <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                      Soporta enlaces de YouTube, TED Talks y procesamiento secuencial por lotes.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Tab Local -->
+                <div id="tab-local" class="tab-content">
+                  <div class="form__field">
+                    <label for="local-file-picker">Seleccionar archivo(s) para subir</label>
+                    <input type="file" id="local-file-picker" accept="audio/*,video/*" multiple />
+                    <div style="text-align: center; margin: 0.5rem 0;" class="muted">— O —</div>
+                    <label for="audio-local-path">Ruta absoluta del archivo (Recomendado para archivos pesados)</label>
+                    <input type="text" id="audio-local-path" placeholder="C:/ruta/al/archivo/audio.wav" />
+                    <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                      Escribir la ruta del archivo evita la carga en red si el servidor corre en su máquina.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botón Principal -->
+              <button id="btn-transcribe" class="btn btn--primary" style="margin-top: 1.5rem;" onclick="startTranscription()">
+                Iniciar Transcripción
+              </button>
+            </div>
+          </section>
+
+          <!-- Panel de Estado y Salida -->
+          <section class="card ks-bento-tile ks-bento-tile--span-6" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Salida y Monitorización</h2>
+            
+            <!-- Notificación general -->
+            <div id="status-notification" class="notification"></div>
+
+            <!-- Barra de Progreso -->
+            <div id="progress-wrapper" class="progress-wrapper" style="display: none;">
+              <div class="progress-bar">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="progress-status"><span class="progress-spinner"></span>Procesando...</span>
+                <span id="progress-percentage">0%</span>
+              </div>
+              <button id="btn-cancel-transcription" class="btn btn--ghost" style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--danger, #e74c3c); border-color: var(--danger, #e74c3c);" onclick="cancelTranscription()">
+                ✕ Cancelar Transcripción
+              </button>
+            </div>
+
+            <!-- Resultados -->
+            <div id="result-wrapper" style="display: none; flex-grow: 1; flex-direction: column; margin-top: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0;">Transcripción Obtenida</h3>
+                <button class="btn btn--ghost" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="copyToClipboard()">
+                  📋 Copiar Texto
+                </button>
+              </div>
+
+              <!-- REPRODUCTOR DE TRANSCRIPCIÓN (TTS) -->
+              <div style="background: var(--panel-soft); padding: 0.85rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); margin: 1rem 0; display: flex; flex-direction: column; gap: 0.6rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                  <strong style="font-size: 0.92rem; display: flex; align-items: center; gap: 0.4rem;">
+                    🔊 Reproductor de Transcripción
+                  </strong>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <label for="tts-rate-select" style="font-size: 0.8rem;" class="muted">Velocidad:</label>
+                    <select id="tts-rate-select" style="padding: 0.2rem 0.5rem; font-size: 0.82rem; width: auto;" onchange="updateTTSRate(this.value)">
+                      <option value="0.75">0.75x</option>
+                      <option value="1" selected>1x (Normal)</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="2">2x</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                  <button id="btn-tts-play" class="btn btn--secondary" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;" onclick="playTranscriptionTTS()">
+                    ▶️ Escuchar
+                  </button>
+                  <button id="btn-tts-pause" class="btn btn--ghost" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; display: none;" onclick="pauseTranscriptionTTS()">
+                    ⏸️ Pausar
+                  </button>
+                  <button id="btn-tts-stop" class="btn btn--ghost" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; color: #d9534f;" onclick="stopTranscriptionTTS()">
+                    ⏹️ Detener
+                  </button>
+                  <select id="tts-voice-select" style="padding: 0.35rem 0.6rem; font-size: 0.82rem; flex-grow: 1; min-width: 160px; max-width: 280px;" onchange="changeTTSVoice(this.value)">
+                    <option value="">Cargando voces del sistema...</option>
+                  </select>
+                </div>
+              </div>
+
+              <p id="transcription-performance" class="muted" role="status"></p>
+              <div id="transcription-downloads" style="display:flex;gap:0.5rem;flex-wrap:wrap;" aria-label="Descargar transcripción y subtítulos"></div>
+              <!-- Salida de texto de la transcripción -->
+              <div id="transcription-text" class="transcription-output"></div>
+
+              <!-- PANEL DE ESTADÍSTICAS Y ANÁLISIS DEL HABLA -->
+              <div id="transcription-stats-panel" style="background: var(--panel-soft); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); margin-top: 1.25rem;">
+                <h4 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem; color: var(--accent);">📊 Panel de Estadísticas y Análisis del Habla</h4>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+                  <div style="background: var(--panel); padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 0.78rem;" class="muted">Palabras Totales</div>
+                    <div id="stat-words-count" style="font-weight: 700; font-size: 1.2rem; color: var(--accent-strong);">0</div>
+                  </div>
+                  <div style="background: var(--panel); padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 0.78rem;" class="muted">Caracteres (con esp.)</div>
+                    <div id="stat-chars-count" style="font-weight: 700; font-size: 1.2rem; color: var(--accent-strong);">0</div>
+                  </div>
+                  <div style="background: var(--panel); padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 0.78rem;" class="muted">Velocidad del Habla</div>
+                    <div id="stat-wpm" style="font-weight: 700; font-size: 1.2rem; color: var(--accent);">- PPM</div>
+                  </div>
+                </div>
+
+                <div style="font-size: 0.85rem;">
+                  <strong>Palabras Clave Más Frecuentes:</strong>
+                  <div id="stat-keywords-tags" style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.4rem;">
+                    <span class="muted" style="font-size: 0.8rem;">Analizando texto...</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: 1.25rem;">
+                <strong>Carpeta de Destino:</strong>
+                <div id="output-directory" class="path-badge">C:/Users/...</div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem;">
+                <button id="btn-save-txt" class="btn btn--primary" onclick="downloadTxt()">
+                  📄 Guardar como TXT (.txt)
+                </button>
+                <button id="btn-save-md" class="btn btn--ghost" style="border-color: var(--border-strong); color: var(--text);" onclick="saveAsMd()">
+                  📝 Guardar como Markdown (.md)
+                </button>
+                <button id="btn-save-tex" class="btn btn--ghost" style="border-color: var(--border-strong); color: var(--text);" onclick="saveAsTex()">
+                  📐 Guardar como LaTeX (.tex)
+                </button>
+              </div>
+            </div>
+
+            <!-- Estado inicial de espera -->
+            <div id="placeholder-wrapper" style="display: flex; align-items: center; justify-content: center; flex-grow: 1; min-height: 200px;" class="muted">
+              <p>Configure los parámetros y presione "Iniciar Transcripción" para comenzar.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- VISTA CONVERTIDOR MP3 -->
+      <div id="view-converter" class="view-section" style="display: none;">
+        <section class="section__header" style="margin-bottom: 2rem;">
+          <div>
+            <p class="badge">Procesamiento de Audio</p>
+            <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem);">Convertidor de Video a MP3</h1>
+          </div>
+          <p class="lead">
+            Extrae y convierte el audio de tus videos (locales o en línea) a archivos MP3 con bitrate de calidad personalizado.
+          </p>
+        </section>
+
+        <div class="ks-bento">
+          <!-- Columna Izquierda: Parámetros del Convertidor -->
+          <section class="card card--accent ks-bento-tile ks-bento-tile--span-6">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Configuración de Conversión</h2>
+            
+            <div class="form">
+              <!-- Selector de Bitrate / Calidad -->
+              <div class="form__field">
+                <label for="mp3-bitrate-slider"><strong>Calidad del MP3 (Bitrate)</strong></label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <input type="range" id="mp3-bitrate-slider" min="124" max="332" value="192" style="flex-grow: 1; margin-right: 1rem; accent-color: var(--accent);" oninput="updateBitrateValue(this.value)" />
+                    <span id="mp3-bitrate-display" style="font-family: ui-monospace, monospace; font-weight: 700; color: var(--accent); font-size: 1.1rem; width: 85px; text-align: right;">192 kbps</span>
+                  </div>
+                  <span id="mp3-quality-tag" class="muted" style="font-size: 0.88rem; font-weight: 500;">Calidad Buena (óptimo balance voz/música)</span>
+                </div>
+                
+                <!-- Botones de Presets Rápidos -->
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                  <button type="button" id="preset-btn-128" class="btn btn--ghost" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="setBitratePreset(128)">128k (Estándar)</button>
+                  <button type="button" id="preset-btn-192" class="btn btn--ghost" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; border-color: var(--accent); color: var(--accent);" onclick="setBitratePreset(192)">192k (Bueno)</button>
+                  <button type="button" id="preset-btn-256" class="btn btn--ghost" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="setBitratePreset(256)">256k (Alta)</button>
+                  <button type="button" id="preset-btn-320" class="btn btn--ghost" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="setBitratePreset(320)">320k (CD)</button>
+                  <button type="button" id="preset-btn-332" class="btn btn--ghost" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="setBitratePreset(332)">332k (Max)</button>
+                </div>
+              </div>
+
+              <!-- Tabs de Selección de Origen del Convertidor -->
+              <div style="margin-top: 1.5rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">Origen del Video / Audio</strong>
+                <div class="tab-container">
+                  <button id="conv-tab-btn-link" class="tab-button is-active" onclick="switchConvTab('conv-tab-link')">Enlace Web (YouTube / URL)</button>
+                  <button id="conv-tab-btn-local" class="tab-button" onclick="switchConvTab('conv-tab-local')">Archivo Local / Subida</button>
+                </div>
+
+                <!-- Tab Link -->
+                <div id="conv-tab-link" class="tab-content is-active">
+                  <div class="form__field">
+                    <label for="conv-video-url">URL del Video</label>
+                    <input type="url" id="conv-video-url" placeholder="https://www.youtube.com/watch?v=..." />
+                    <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                      Descarga y extrae audio de YouTube u otros sitios web compatibles.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Tab Local -->
+                <div id="conv-tab-local" class="tab-content">
+                  <div class="form__field">
+                    <label for="conv-local-file-picker">Seleccionar archivo para subir</label>
+                    <input type="file" id="conv-local-file-picker" accept="video/*,audio/*" />
+                    <div style="text-align: center; margin: 0.5rem 0;" class="muted">— O —</div>
+                    <label for="conv-video-local-path">Ruta absoluta del archivo en esta PC</label>
+                    <input type="text" id="conv-video-local-path" placeholder="C:/videos/grabacion.mp4" />
+                    <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                      Especifica la ruta completa para evitar cargas en la red local.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botón Principal de Conversión -->
+              <button id="btn-convert" class="btn btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="startConversion()">
+                Convertir a MP3
+              </button>
+            </div>
+          </section>
+
+          <!-- Columna Derecha: Salida del Convertidor -->
+          <section class="card ks-bento-tile ks-bento-tile--span-6" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Resultado y Monitorización</h2>
+            
+            <div id="conv-status-notification" class="notification"></div>
+
+            <!-- Barra de Progreso de Conversión -->
+            <div id="conv-progress-wrapper" class="progress-wrapper" style="display: none;">
+              <div class="progress-bar">
+                <div id="conv-progress-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="conv-progress-status"><span class="progress-spinner"></span>Procesando...</span>
+                <span id="conv-progress-percentage">0%</span>
+              </div>
+            </div>
+
+            <!-- Resultados del Convertidor -->
+            <div id="conv-result-wrapper" style="display: none; flex-grow: 1; flex-direction: column; margin-top: 1rem;">
+              <div style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1.5rem;">
+                <h3 style="margin-top: 0; color: var(--accent);">🎵 MP3 Generado con Éxito</h3>
+                <div style="display: grid; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.92rem;">
+                  <div><strong>Nombre:</strong> <span id="conv-res-name" style="word-break: break-all;">-</span></div>
+                  <div><strong>Calidad:</strong> <span id="conv-res-quality">-</span></div>
+                  <div><strong>Tamaño:</strong> <span id="conv-res-size">-</span></div>
+                  <div><strong>Ubicación en Servidor:</strong> <span id="conv-res-path" class="path-badge" style="display: block; margin-top: 0.25rem;">-</span></div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: auto;">
+                <button id="btn-conv-download" class="btn btn--primary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem;" onclick="downloadConvertedMP3()">
+                  📥 Descargar Archivo MP3
+                </button>
+                <button id="btn-conv-transcribe" class="btn btn--secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem;" onclick="sendMP3ToTranscriptor()">
+                  🎙️ Cargar en Transcriptor para Transcribir
+                </button>
+              </div>
+            </div>
+
+            <!-- Estado inicial de espera del Convertidor -->
+            <div id="conv-placeholder-wrapper" style="display: flex; align-items: center; justify-content: center; flex-grow: 1; min-height: 200px;" class="muted">
+              <p>Establezca los parámetros de conversión y presione "Convertir a MP3" para iniciar.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- VISTA DESCARGAR VIDEOS -->
+      <div id="view-video-downloader" class="view-section" style="display: none;">
+        <section class="section__header" style="margin-bottom: 2rem;">
+          <div>
+            <p class="badge">Descargas YouTube MP4</p>
+            <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem);">Descargar Videos de YouTube</h1>
+          </div>
+          <p class="lead">
+            Descarga tus videos favoritos de YouTube en formato MP4 de alta definición (con video y audio unificados) para ver sin conexión.
+          </p>
+        </section>
+
+        <div class="ks-bento">
+          <!-- Columna Izquierda: Configuración de Descarga -->
+          <section class="card card--accent ks-bento-tile ks-bento-tile--span-6">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Parámetros de Descarga</h2>
+            
+            <div class="form">
+              <div class="form__field">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                  <label for="video-download-url" style="margin-bottom: 0;"><strong>URL del Video de YouTube</strong></label>
+                  <button type="button" class="btn btn--ghost" style="font-size: 0.78rem; padding: 0.2rem 0.5rem; color: var(--accent);" onclick="toggleVideoBatchMode()">
+                    <span id="btn-video-batch-label">📋 Múltiples Enlaces (Por Lotes)</span>
+                  </button>
+                </div>
+                <div id="single-video-url-wrapper">
+                  <input type="url" id="video-download-url" placeholder="https://www.youtube.com/watch?v=..." />
+                </div>
+                <div id="batch-video-url-wrapper" style="display: none;">
+                  <textarea id="video-url-batch" rows="4" placeholder="Pega aquí múltiples enlaces de YouTube (uno por línea)..." style="width: 100%; border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <p class="muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
+                  Ingresa enlaces de YouTube para descargar en formato MP4 uno a uno o por lotes.
+                </p>
+              </div>
+
+              <div class="form__field">
+                <label for="video-quality-select"><strong>Calidad del Video</strong></label>
+                <select id="video-quality-select">
+                  <option value="best" selected>Máxima Calidad Disponible (1080p+ Full HD)</option>
+                  <option value="720p">720p (HD Estándar)</option>
+                  <option value="480p">480p (Calidad Media / Menor peso)</option>
+                  <option value="360p">360p (Calidad Básica / Rápida)</option>
+                </select>
+              </div>
+
+              <button id="btn-start-video-download" class="btn btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="startVideoDownload()">
+                🎬 Iniciar Descarga de Video
+              </button>
+            </div>
+          </section>
+
+          <!-- Columna Derecha: Monitorización y Descarga -->
+          <section class="card ks-bento-tile ks-bento-tile--span-6" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Estado de Descarga</h2>
+            
+            <div id="video-notification" class="notification"></div>
+
+            <!-- Barra de Progreso -->
+            <div id="video-progress-wrapper" class="progress-wrapper" style="display: none;">
+              <div class="progress-bar">
+                <div id="video-progress-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="video-progress-status"><span class="progress-spinner"></span>Iniciando...</span>
+                <span id="video-progress-percentage">0%</span>
+              </div>
+              <button id="btn-cancel-video-download" class="btn btn--ghost" style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--danger, #e74c3c); border-color: var(--danger, #e74c3c);" onclick="cancelVideoDownload()">
+                ✕ Cancelar Descarga
+              </button>
+            </div>
+
+            <!-- Resultado de Descarga -->
+            <div id="video-result-wrapper" style="display: none; flex-grow: 1; flex-direction: column; margin-top: 1rem;">
+              <div style="background: var(--panel-soft); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 1.5rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--accent-strong);" id="video-result-title">Video Descargado Exitosa y Físicamente</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 0.75rem;"><strong>Archivo:</strong> <span id="video-result-filename" style="word-break: break-all;">video.mp4</span></p>
+                <p style="font-size: 0.9rem; margin-bottom: 0.75rem;"><strong>Tamaño:</strong> <span id="video-result-filesize">0 MB</span></p>
+                
+                <div style="margin-top: 1rem;">
+                  <strong>Carpeta de Almacenamiento Local:</strong>
+                  <div id="video-output-directory" class="path-badge">.../Descarga_Videos_YT</div>
+                </div>
+              </div>
+
+              <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <a id="btn-download-video-file" href="#" class="btn btn--primary" style="text-decoration: none; text-align: center; flex: 1;">
+                  📥 Guardar / Descargar Video (.mp4)
+                </a>
+              </div>
+            </div>
+
+            <!-- Estado Inicial -->
+            <div id="video-placeholder-wrapper" style="display: flex; align-items: center; justify-content: center; flex-grow: 1; min-height: 200px;" class="muted">
+              <p>Ingresa la URL del video y presiona "Iniciar Descarga de Video" para comenzar.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- VISTA RECORTADOR DE MULTIMEDIA -->
+      <div id="view-trimmer" class="view-section" style="display: none;">
+        <section class="section__header" style="margin-bottom: 2rem;">
+          <div>
+            <p class="badge">Edición Precisa FFmpeg</p>
+            <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem);">Recortador de Audio y Video</h1>
+          </div>
+          <p class="lead">
+            Extrae fragmentos exactos de tus videos o audios (de YouTube o locales) definiendo marcas de tiempo de inicio y fin.
+          </p>
+        </section>
+
+        <div class="ks-bento">
+          <!-- Columna Izquierda: Parámetros del Recortador -->
+          <section class="card card--accent ks-bento-tile ks-bento-tile--span-6">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Configuración de Recorte</h2>
+            
+            <div class="form">
+              <!-- Tabs de Selección de Origen -->
+              <div>
+                <strong style="display: block; margin-bottom: 0.5rem;">Origen del Archivo</strong>
+                <div class="tab-container">
+                  <button class="tab-button is-active" onclick="switchTrimTab('trim-tab-link')">Enlace Web (YouTube)</button>
+                  <button class="tab-button" onclick="switchTrimTab('trim-tab-local')">Archivo Local / Subida</button>
+                </div>
+
+                <!-- Tab Link -->
+                <div id="trim-tab-link" class="tab-content is-active">
+                  <div class="form__field">
+                    <label for="trim-url">URL del Video de YouTube</label>
+                    <input type="url" id="trim-url" placeholder="https://www.youtube.com/watch?v=..." />
+                  </div>
+                </div>
+
+                <!-- Tab Local -->
+                <div id="trim-tab-local" class="tab-content">
+                  <div class="form__field">
+                    <label for="trim-local-file-picker">Seleccionar archivo para subir</label>
+                    <input type="file" id="trim-local-file-picker" accept="audio/*,video/*" />
+                    <div style="text-align: center; margin: 0.5rem 0;" class="muted">— O —</div>
+                    <label for="trim-video-local-path">Ruta absoluta del archivo local</label>
+                    <input type="text" id="trim-video-local-path" placeholder="C:/ruta/al/archivo/video.mp4" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selector de Formato de Salida -->
+              <div class="form__field" style="margin-top: 1rem;">
+                <label for="trim-format-select"><strong>Formato de Salida</strong></label>
+                <select id="trim-format-select">
+                  <option value="mp4" selected>Video MP4 (Mantener Video y Audio)</option>
+                  <option value="mp3">Audio MP3 (Solo Pista Sonora)</option>
+                </select>
+              </div>
+
+              <!-- Controles de Tiempo de Inicio y Fin -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div class="form__field">
+                  <label for="trim-start-time"><strong>Tiempo Inicio</strong> (HH:MM:SS)</label>
+                  <input type="text" id="trim-start-time" placeholder="00:00:00" value="00:00:00" />
+                </div>
+                <div class="form__field">
+                  <label for="trim-end-time"><strong>Tiempo Fin</strong> (HH:MM:SS)</label>
+                  <input type="text" id="trim-end-time" placeholder="00:05:00" value="00:01:00" />
+                </div>
+              </div>
+
+              <button id="btn-start-trim" class="btn btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="startTrim()">
+                ✂️ Iniciar Recorte Multimedia
+              </button>
+            </div>
+          </section>
+
+          <!-- Columna Derecha: Monitorización y Descarga del Recorte -->
+          <section class="card ks-bento-tile ks-bento-tile--span-6" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Estado de Recorte</h2>
+            
+            <div id="trim-notification" class="notification"></div>
+
+            <!-- Barra de Progreso -->
+            <div id="trim-progress-wrapper" class="progress-wrapper" style="display: none;">
+              <div class="progress-bar">
+                <div id="trim-progress-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="trim-progress-status"><span class="progress-spinner"></span>Procesando...</span>
+                <span id="trim-progress-percentage">0%</span>
+              </div>
+              <button id="btn-cancel-trim" class="btn btn--ghost" style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--danger, #e74c3c); border-color: var(--danger, #e74c3c);" onclick="cancelTrim()">
+                ✕ Cancelar Recorte
+              </button>
+            </div>
+
+            <!-- Resultado del Recorte -->
+            <div id="trim-result-wrapper" style="display: none; flex-grow: 1; flex-direction: column; margin-top: 1rem;">
+              <div style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1.5rem;">
+                <h3 style="margin-top: 0; color: var(--accent);">✂️ Fragmento Recortado con Éxito</h3>
+                <div style="display: grid; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.92rem;">
+                  <div><strong>Nombre:</strong> <span id="trim-res-name" style="word-break: break-all;">-</span></div>
+                  <div><strong>Tamaño:</strong> <span id="trim-res-size">-</span></div>
+                  <div><strong>Ubicación en Servidor:</strong> <span id="trim-res-path" class="path-badge" style="display: block; margin-top: 0.25rem;">-</span></div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: auto;">
+                <a id="btn-trim-download" href="#" class="btn btn--primary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem; text-decoration: none;">
+                  📥 Guardar / Descargar Recorte
+                </a>
+                <button id="btn-trim-transcribe" class="btn btn--secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem;" onclick="sendTrimToTranscriptor()">
+                  🎙️ Cargar Fragmento en Transcriptor para Transcribir
+                </button>
+              </div>
+            </div>
+
+            <!-- Estado Inicial -->
+            <div id="trim-placeholder-wrapper" style="display: flex; align-items: center; justify-content: center; flex-grow: 1; min-height: 200px;" class="muted">
+              <p>Establezca los parámetros de inicio/fin y presione "Iniciar Recorte Multimedia".</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- VISTA FUSIONADOR DE MULTIMEDIA -->
+      <div id="view-merger" class="view-section" style="display: none;">
+        <section class="section__header" style="margin-bottom: 2rem;">
+          <div>
+            <p class="badge">Unificación FFmpeg Concat</p>
+            <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem);">Fusionador Multimedia</h1>
+          </div>
+          <p class="lead">
+            Selecciona y ordena múltiples archivos de audio o video para unirlos en un solo archivo consolidado en MP4 o MP3.
+          </p>
+        </section>
+
+        <div class="ks-bento">
+          <!-- Columna Izquierda: Selección de Archivos para Fusionar -->
+          <section class="card card--accent ks-bento-tile ks-bento-tile--span-6">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Lista de Archivos a Fusionar</h2>
+            
+            <div class="form">
+              <!-- Selección de Archivos -->
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <label for="merge-file-picker" class="btn btn--secondary" style="cursor: pointer; padding: 0.6rem 1rem; font-size: 0.9rem;">
+                  📁 Añadir Archivos de la PC
+                </label>
+                <input type="file" id="merge-file-picker" accept="audio/*,video/*" multiple style="display: none;" onchange="handleMergeFilesSelect(this.files)" />
+              </div>
+
+              <!-- Lista de Elementos Ordenables -->
+              <div style="background: var(--panel-soft); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); min-height: 180px; max-height: 320px; overflow-y: auto;">
+                <div id="merge-items-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <div class="muted" style="text-align: center; padding: 2rem 1rem;">No hay archivos seleccionados para fusionar.</div>
+                </div>
+              </div>
+
+              <!-- Selector de Formato de Salida -->
+              <div class="form__field" style="margin-top: 1.25rem;">
+                <label for="merge-format-select"><strong>Formato de Salida Fusionado</strong></label>
+                <select id="merge-format-select">
+                  <option value="mp4" selected>Video MP4 (Unir Pistas de Video y Audio)</option>
+                  <option value="mp3">Audio MP3 (Unir Pistas Sonoras)</option>
+                </select>
+              </div>
+
+              <button id="btn-start-merge" class="btn btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="startMerge()">
+                🧩 Iniciar Fusión Multimedia
+              </button>
+            </div>
+          </section>
+
+          <!-- Columna Derecha: Estado y Descarga de Fusión -->
+          <section class="card ks-bento-tile ks-bento-tile--span-6" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Estado de Fusión</h2>
+            
+            <div id="merge-notification" class="notification"></div>
+
+            <!-- Barra de Progreso -->
+            <div id="merge-progress-wrapper" class="progress-wrapper" style="display: none;">
+              <div class="progress-bar">
+                <div id="merge-progress-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="merge-progress-status"><span class="progress-spinner"></span>Procesando...</span>
+                <span id="merge-progress-percentage">0%</span>
+              </div>
+              <button id="btn-cancel-merge" class="btn btn--ghost" style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--danger, #e74c3c); border-color: var(--danger, #e74c3c);" onclick="cancelMerge()">
+                ✕ Cancelar Fusión
+              </button>
+            </div>
+
+            <!-- Resultado de la Fusión -->
+            <div id="merge-result-wrapper" style="display: none; flex-grow: 1; flex-direction: column; margin-top: 1rem;">
+              <div style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1.5rem;">
+                <h3 style="margin-top: 0; color: var(--accent);">🧩 Archivos Fusionados con Éxito</h3>
+                <div style="display: grid; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.92rem;">
+                  <div><strong>Nombre:</strong> <span id="merge-res-name" style="word-break: break-all;">-</span></div>
+                  <div><strong>Tamaño:</strong> <span id="merge-res-size">-</span></div>
+                  <div><strong>Ubicación en Servidor:</strong> <span id="merge-res-path" class="path-badge" style="display: block; margin-top: 0.25rem;">-</span></div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: auto;">
+                <a id="btn-merge-download" href="#" class="btn btn--primary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem; text-decoration: none;">
+                  📥 Guardar / Descargar Archivo Fusionado
+                </a>
+                <button id="btn-merge-transcribe" class="btn btn--secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem;" onclick="sendMergeToTranscriptor()">
+                  🎙️ Cargar Archivo Fusionado en Transcriptor para Transcribir
+                </button>
+              </div>
+            </div>
+
+            <!-- Estado Inicial -->
+            <div id="merge-placeholder-wrapper" style="display: flex; align-items: center; justify-content: center; flex-grow: 1; min-height: 200px;" class="muted">
+              <p>Añada al menos 2 archivos a la lista y presione "Iniciar Fusión Multimedia".</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- PANEL DE COLA DE TAREAS Y PROCESAMIENTO POR LOTES -->
+      <section id="global-queue-panel" class="card" style="margin-top: 2rem; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h2 style="font-size: 1.35rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">⚡ Cola de Procesamiento por Lotes</h2>
+            <span id="queue-badge-count" class="badge" style="background: var(--accent); color: #fff; font-weight: 600;">0 en cola</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn--ghost" style="font-size: 0.8rem; color: var(--danger, #d9534f); border-color: rgba(217, 83, 79, 0.3);" onclick="cancelCurrentQueueTask()">
+              ⏹️ Cancelar Tarea Actual
+            </button>
+            <button class="btn btn--ghost" style="font-size: 0.8rem; color: #d9534f; border-color: rgba(217, 83, 79, 0.3);" onclick="clearBatchQueue()">
+              🗑️ Vaciar Cola
+            </button>
+          </div>
+        </div>
+
+        <div style="background: var(--panel-soft); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); max-height: 250px; overflow-y: auto;">
+          <div id="queue-items-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="muted" style="text-align: center; padding: 1rem;">No hay tareas pendientes en la cola.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel de Gestión de Archivos Temporales -->
+      <section class="card" style="margin-top: 2rem; opacity: 1;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Gestión de Archivos Temporales y Descargas</h2>
+        <p class="muted" style="font-size: 0.95rem; margin-bottom: 1.5rem;">
+          Administra los audios, videos descargados, archivos subidos y MP3 convertidos para liberar espacio en disco o cargarlos directamente al transcriptor.
+        </p>
+        
+        <div class="ks-bento" style="gap: 1.5rem;">
+          <!-- Audios de YouTube -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">🎵 Audio de YouTube</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('yt')">
+                Vaciar
+              </button>
+            </div>
+            <div id="yt-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+
+          <!-- Videos de YouTube MP4 -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">🎬 Videos MP4 (YT)</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('video')">
+                Vaciar
+              </button>
+            </div>
+            <div id="video-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+          
+          <!-- Archivos Subidos -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">📤 Archivos Subidos</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('upload')">
+                Vaciar
+              </button>
+            </div>
+            <div id="uploaded-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+
+          <!-- MP3s Convertidos -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">🎼 MP3s Convertidos</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('mp3')">
+                Vaciar
+              </button>
+            </div>
+            <div id="mp3-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+
+          <!-- Recortes Multimedia -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">✂️ Recortes Multimedia</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('trimmed')">
+                Vaciar
+              </button>
+            </div>
+            <div id="trimmed-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+
+          <!-- Archivos Fusionados -->
+          <div class="ks-bento-tile ks-bento-tile--span-4" style="background: var(--panel-soft); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; font-size: 1rem;">🧩 Archivos Fusionados</h3>
+              <button class="btn btn--ghost" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; border-color: rgba(217, 83, 79, 0.3); color: #d9534f; background: transparent;" onclick="clearCategory('merged')">
+                Vaciar
+              </button>
+            </div>
+            <div id="merged-file-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="muted" style="padding: 1rem; text-align: center; font-size: 0.88rem;">Cargando archivos...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </section>
+    </main>
+
+    <footer class="footer" style="padding: 2.5rem 0; text-align: center; color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--border);">
+      <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+        <p style="margin: 0;">Desarrollado por <strong>Angel Llanos Herrera</strong></p>
+        <p style="font-size: 0.85rem; color: var(--muted); margin: 0;">
+          GitHub: <a href="https://github.com/AngelTLH" target="_blank" style="color: var(--accent-strong); text-decoration: none; font-weight: 600;">@AngelTLH</a> | 
+          Correo: <a href="mailto:angel.llanos@alumnos.ucm.cl" style="color: var(--accent-strong); text-decoration: none; font-weight: 600;">angel.llanos@alumnos.ucm.cl</a>
+        </p>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; font-size: 0.85rem; margin-top: 0.25rem;">
+          <a href="https://ko-fi.com/angelllanos" target="_blank" style="display: inline-flex; align-items: center; gap: 0.3rem; color: #d97706; text-decoration: none; font-weight: 600;">
+            ☕ Apoyar en Ko-fi
+          </a>
+          <span style="color: var(--border-strong);">|</span>
+          <a href="https://github.com/sponsors/AngelTLH" target="_blank" style="display: inline-flex; align-items: center; gap: 0.3rem; color: #4f46e5; text-decoration: none; font-weight: 600;">
+            💖 GitHub Sponsors
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/transcriptor.js"></script>
+  </body>
+</html>
